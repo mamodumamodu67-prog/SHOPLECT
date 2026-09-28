@@ -1,0 +1,19 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Group 4">
+<circle id="Ellipse 1132" cx="18" cy="18" r="18" fill="#EEF5DA"/>
+<g id="Mask group">
+<mask id="mask0_0_44" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="7" y="8" width="22" height="20">
+<g id="Group">
+<g id="Group_2">
+<path id="Vector" d="M8.5 10C8.5 9.7348 8.60536 9.48044 8.79289 9.29291C8.98043 9.10537 9.23478 9.00002 9.5 9.00002H15.5L18 12H26.5C26.7652 12 27.0196 12.1054 27.2071 12.2929C27.3946 12.4804 27.5 12.7348 27.5 13V26C27.5 26.2652 27.3946 26.5196 27.2071 26.7071C27.0196 26.8947 26.7652 27 26.5 27H9.5C9.23478 27 8.98043 26.8947 8.79289 26.7071C8.60536 26.5196 8.5 26.2652 8.5 26V10Z" fill="white" stroke="white" stroke-width="2" stroke-linejoin="round"/>
+<path id="Vector_2" d="M16.5 17.5L14 20L16.5 22.5" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="Vector_3" d="M14 20H22V17" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+</g>
+</mask>
+<g mask="url(#mask0_0_44)">
+<path id="Vector_4" d="M6 6.00002H30V30H6V6.00002Z" fill="#784C31"/>
+</g>
+</g>
+</g>
+</svg>

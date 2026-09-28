@@ -1,0 +1,45 @@
+:root {
+  /* Colors from Figma */
+  --brown: #784c31;
+  --cream: #fbfff1;
+  --lime-tint: #eef5da;
+  --teal-dark: #234245;
+  --page: #f0f3f6;
+  --ink: #3c3535;
+  --slate: #666d80;
+  --gray: #525252;
+  --white: #ffffff;
+  --shadow-card: 0 4px 22.8px rgba(0, 0, 0, 0.05);
+  --shadow-soft: 0 4px 11.4px rgba(0, 0, 0, 0.05);
+  --shadow-nav: 0 4px 6.4px rgba(0, 0, 0, 0.08);
+  --radius: 12px;
+  --pill: 4444px;
+  --font-body: var(--font-poppins), system-ui, sans-serif;
+  --font-display: var(--font-hedvig), Georgia, serif;
+  --font-jakarta-stack: var(--font-jakarta), system-ui, sans-serif;
+  --font-lato: var(--font-lato-var), system-ui, sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; overflow-x: hidden; scroll-padding-top: 80px; }
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip; /* safety net: nothing may cause sideways page scroll (clip keeps sticky headers working) */
+  min-height: 100vh; min-height: 100dvh;
+  padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px);
+}
+input, select, textarea, button { max-width: 100%; }
+input, select, textarea { font-size: max(16px, 1em); } /* stops iOS zooming into fields */
+h1, h2, h3, p, ul { margin: 0; padding: 0; }
+ul { list-style: none; }
+img { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; cursor: pointer; }
+:focus-visible { outline: 3px solid var(--brown); outline-offset: 3px; }
+.sr-only {
+  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}

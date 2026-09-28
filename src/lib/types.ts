@@ -1,0 +1,25 @@
+export type Category = { slug: string; name: string; icon: string };
+export type Seller = { id: string; name: string; positive: number };
+export type Product = {
+  id: string; title: string; price: number; description: string; image?: string; images?: string[];
+  condition: 'New' | 'Used'; category: string; subCategory?: string; seller: Seller;
+  likes: number; views: number; inStock: boolean; sold?: boolean; blurb?: string;
+};
+export type Vendor = { id: string; name: string; location: string; lastSeen: string; verified: boolean; phone: string; avatar?: string; positive: number };
+export type Shop = { id: string; name: string; category: string; description: string; positive: number; phone: string; address: string; logo?: string };
+export type OrderStatus = 'Delivered' | 'Pending' | 'Cancelled' | 'In Escrow' | 'Disputed';
+export type Order = { id: string; orderNo: string; title: string; image?: string; status: OrderStatus; date: string; role: 'buyer' | 'seller'; stage: number; amount: number };
+export type Offer = { id: string; title: string; image?: string; date: string; amount: number; listPrice: number; direction: 'received' | 'sent'; from: string };
+export type Notice = { id: string; text: string; href: string };
+export type Person = { id: string; name: string; avatar?: string; when: string; following: boolean };
+export type WalletTx = { id: string; date: string; amount: number; type: 'Withdraw' | 'Deposit'; status: 'Successful' | 'Failed' | 'Pending' };
+export type Wallet = { balance: number; incoming: number; outgoing: number; transactions: WalletTx[] };
+export type Bank = { id: string; accountName: string; accountNumber: string; bankName: string };
+export type Message = { id: string; from: 'me' | 'them' | 'admin'; author?: string; text: string; when: string };
+export type Conversation = { id: string; name: string; date: string; active: boolean; messages: Message[] };
+export type Promotion = { id: string; created: string; product: string; category: string; status: 'Active' | 'Under Review' | 'Declined' | 'Completed'; start: string; end: string };
+export type DisputeStep = { title: string; when: string; note?: string };
+export type Dispute = { ticketId: string; questionType: string; steps: DisputeStep[] };
+export type Appeal = { id: string; title: string; status: 'Completed' | 'Ongoing'; messages: Message[] };
+export type User = { name: string; email: string; phone: string; avatar?: string };
+export type SearchParams = { q?: string; category?: string; min?: number; max?: number; sort?: string; vendor?: string };

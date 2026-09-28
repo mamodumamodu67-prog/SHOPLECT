@@ -1,0 +1,10 @@
+User-Agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /account
+Disallow: /wallet
+Disallow: /orders
+Disallow: /inbox
+Disallow: /api
+
+Sitemap: https://www.shoplect.com/sitemap.xml
