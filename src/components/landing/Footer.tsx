@@ -30,11 +30,6 @@ export default function Footer() {
           <li><Link href={ROUTES.faq}>FAQs</Link></li>
         </ul>
       </nav>
-      {/* Figma repeats the "About us" column here; kept as designed. */}
-      <nav aria-label="About (more)">
-        <h2 className={s.fHead}>About us</h2>
-        <ul className={s.fList}>{ABOUT.map(([l, h]) => <li key={l}><Link href={h}>{l}</Link></li>)}</ul>
-      </nav>
       <div>
         <h2 className={s.fHead}>Join us on</h2>
         <ul className={s.social}>
