@@ -9,6 +9,11 @@ export { ApiError, isApiConfigured } from './client';
 export type Category = { id: string; name: string; slug: string };
 export type Testimonial = { name: string; role?: string; quote: string };
 
+type ApiTestimonial = Testimonial & {
+  authorName?: string;
+  authorTitle?: string;
+};
+
 const MOCK_TESTIMONIALS: Testimonial[] = [
   { name: 'Hannah', quote: 'Smooth experience from start to finish. I chatted directly with the seller, paid securely, and got my package within 3 days. Love it!' },
   { name: 'Steve M.', quote: 'I was a bit nervous at first, but the escrow system gave me peace of mind. My order arrived on time and exactly as described. Highly recommended!' },
@@ -16,8 +21,15 @@ const MOCK_TESTIMONIALS: Testimonial[] = [
 ];
 
 export const testimonialsApi = {
-  list: async (): Promise<Testimonial[]> =>
-    isApiConfigured ? apiFetch<Testimonial[]>('/testimonials') : MOCK_TESTIMONIALS,
+  list: async (): Promise<Testimonial[]> => {
+    if (!isApiConfigured) return MOCK_TESTIMONIALS;
+    const testimonials = await apiFetch<ApiTestimonial[]>('/testimonials');
+    return testimonials.map((testimonial) => ({
+      name: testimonial.name || testimonial.authorName || 'Shoplect customer',
+      role: testimonial.role || testimonial.authorTitle,
+      quote: testimonial.quote,
+    }));
+  },
 };
 export * from './auth';
 export * from './resources';
