@@ -42,7 +42,18 @@ export const catalogApi = {
     if (p.sort === 'price-asc') items = [...items].sort((a, b) => a.price - b.price);
     if (p.sort === 'price-desc') items = [...items].sort((a, b) => b.price - a.price);
     return { total: items.length, items };
-  }, { query: { q: p.q || '', category: p.category, minPrice: p.min, maxPrice: p.max, sort: p.sort } }).then((result) => { const raw = dataOf<any[]>(result); return { total: (result as any).meta?.total ?? raw.length, items: raw.map(productOf) }; }),
+  }, { query: { q: p.q || '', category: p.category, minPrice: p.min, maxPrice: p.max, sort: p.sort } }).then((result) => {
+    const payload = dataOf<any>(result);
+    const raw: any[] = Array.isArray(payload)
+      ? payload
+      : Array.isArray(payload?.items)
+        ? payload.items
+        : Array.isArray(payload?.products)
+          ? payload.products
+          : [];
+    const total = result?.meta?.total ?? payload?.meta?.total ?? payload?.total ?? raw.length;
+    return { total: Number(total), items: raw.map(productOf) };
+  }),
   product: (id: string) => call<any>(`/products/${encodeURIComponent(id)}`, () => M.PRODUCTS.find((x) => x.id === id) || null).then((raw) => raw ? productOf(raw) : null),
   topProducts: () => call<any>('/products', () => M.PRODUCTS.slice(0, 8), { query: { sort: 'top', limit: 8 } }).then((raw) => dataOf<any[]>(raw).map(productOf)),
   similar: (id: string) => call<any[]>(`/products/${encodeURIComponent(id)}/similar`, () => M.PRODUCTS.filter((x) => x.id !== id).slice(0, 8), { query: { limit: 8 } }).then((raw) => raw.map(productOf)),
