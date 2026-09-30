@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { accountApi } from '@/lib/api';
 import { useSession } from '@/lib/session';
 import { isStrongPassword } from '@/lib/validation';
@@ -44,29 +44,89 @@ export function PasswordPanel() {
   );
 }
 
-const NOTIF_ITEMS = ['New messages', 'Offers on my products', 'Order status updates', 'Promotions and news'];
+type NotificationPreferences = {
+  pauseAll: boolean;
+  commentsAndLikes: 'EVERYONE' | 'FOLLOWERS_ONLY';
+  messages: boolean;
+  emails: boolean;
+  feedbackEmails: boolean;
+  textMessages: boolean;
+  newsletters: boolean;
+};
+const DEFAULT_PREFERENCES: NotificationPreferences = { pauseAll: false, commentsAndLikes: 'EVERYONE', messages: true, emails: true, feedbackEmails: true, textMessages: false, newsletters: false };
+const NOTIF_ITEMS: { key: Exclude<keyof NotificationPreferences, 'commentsAndLikes'>; label: string }[] = [
+  { key: 'pauseAll', label: 'Pause all notifications' },
+  { key: 'messages', label: 'Messages' },
+  { key: 'emails', label: 'Email notifications' },
+  { key: 'feedbackEmails', label: 'Feedback emails' },
+  { key: 'textMessages', label: 'Text messages' },
+  { key: 'newsletters', label: 'Newsletters' },
+];
 export function NotificationSettingsPanel() {
-  const [on, setOn] = useState<Record<string, boolean>>({ 'New messages': true, 'Offers on my products': true, 'Order status updates': true, 'Promotions and news': false });
-  const [saved, setSaved] = useState(false);
+  const [preferences, setPreferences] = useState<NotificationPreferences>(DEFAULT_PREFERENCES);
+  const [msg, setMsg] = useState(''); const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    let active = true;
+    accountApi.notificationPreferences().then((value) => { if (active) setPreferences((current) => ({ ...current, ...value })); }).catch(() => {});
+    return () => { active = false; };
+  }, []);
+  async function save() {
+    setBusy(true); setMsg('');
+    try { await accountApi.saveNotifications(preferences); setMsg('Preferences saved.'); }
+    catch { setMsg('Could not save preferences.'); }
+    finally { setBusy(false); }
+  }
   return (
     <div className="set-panel dpanel">
       <h2>Notification settings</h2>
-      {NOTIF_ITEMS.map((k) => (
-        <div key={k} className="notif-row"><span>{k}</span>
-          <span className="toggle"><input type="checkbox" checked={on[k]} onChange={(e) => { setOn({ ...on, [k]: e.target.checked }); setSaved(false); }} /><span /></span></div>
+      {NOTIF_ITEMS.map(({ key, label }) => (
+        <div key={key} className="notif-row"><span>{label}</span>
+          <span className="toggle"><input type="checkbox" checked={preferences[key]} onChange={(e) => { setPreferences({ ...preferences, [key]: e.target.checked }); setMsg(''); }} /><span /></span></div>
       ))}
-      <div><button className="btn" onClick={() => { accountApi.saveNotifications(on).catch(() => {}); setSaved(true); }}>Save preferences</button>{saved && <span className="f-hint" style={{ marginLeft: 12 }}>Saved.</span>}</div>
+      <div className="f-group"><label className="f-label" htmlFor="comments-likes">Comments and likes</label><select id="comments-likes" className="f-select" value={preferences.commentsAndLikes} onChange={(e) => { setPreferences({ ...preferences, commentsAndLikes: e.target.value as NotificationPreferences['commentsAndLikes'] }); setMsg(''); }}><option value="EVERYONE">Everyone</option><option value="FOLLOWERS_ONLY">Followers only</option></select></div>
+      {msg && <p className="f-hint" role="status">{msg}</p>}
+      <div><button className="btn" onClick={save} disabled={busy}>{busy ? 'Saving…' : 'Save preferences'}</button></div>
     </div>
   );
 }
 
 export function DeliverySettingsPanel() {
-  const [address, setAddress] = useState(''); const [busy, setBusy] = useState(false); const [msg, setMsg] = useState('');
-  async function submit(e: React.FormEvent) { e.preventDefault(); setBusy(true); try { await accountApi.saveDelivery({ address }); setMsg('Default address saved.'); } catch { setMsg('Could not save your address.'); } finally { setBusy(false); } }
+  const { user } = useSession();
+  const [addressId, setAddressId] = useState('');
+  const [f, setF] = useState({ recipientName: user?.name || '', phone: user?.phone || '', addressLine: '', city: '', state: '' });
+  const [busy, setBusy] = useState(false); const [msg, setMsg] = useState('');
+  useEffect(() => {
+    let active = true;
+    accountApi.addresses().then((addresses) => {
+      if (!active) return;
+      const current = addresses.find((address) => address.isDefault) || addresses[0];
+      if (current) {
+        setAddressId(current.id);
+        setF({ recipientName: current.recipientName || user?.name || '', phone: current.phone || user?.phone || '', addressLine: current.addressLine || '', city: current.city || '', state: current.state || '' });
+      }
+    }).catch(() => {});
+    return () => { active = false; };
+  }, [user?.name, user?.phone]);
+  const set = (key: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement>) => setF((current) => ({ ...current, [key]: e.target.value }));
+  async function submit(e: React.FormEvent) {
+    e.preventDefault(); setBusy(true); setMsg('');
+    try {
+      await accountApi.saveAddress(addressId || undefined, { ...f, isDefault: true });
+      const addresses = await accountApi.addresses();
+      const current = addresses.find((address) => address.isDefault) || addresses[0];
+      if (current) setAddressId(current.id);
+      setMsg('Default address saved.');
+    } catch { setMsg('Could not save your address.'); }
+    finally { setBusy(false); }
+  }
   return (
     <form className="set-panel dpanel f-form" onSubmit={submit}>
       <h2>Delivery address</h2>
-      <div className="f-group"><label className="f-label" htmlFor="da">Default delivery address</label><textarea id="da" className="f-area" value={address} onChange={(e) => setAddress(e.target.value.slice(0, 300))} /></div>
+      <div className="f-group"><label className="f-label" htmlFor="drn">Recipient name</label><input id="drn" className="f-input" value={f.recipientName} onChange={set('recipientName')} required /></div>
+      <div className="f-group"><label className="f-label" htmlFor="dph">Phone</label><input id="dph" className="f-input" value={f.phone} onChange={set('phone')} required /></div>
+      <div className="f-group"><label className="f-label" htmlFor="da">Street address</label><input id="da" className="f-input" value={f.addressLine} onChange={set('addressLine')} required /></div>
+      <div className="two-col"><div className="f-group"><label className="f-label" htmlFor="dc">City</label><input id="dc" className="f-input" value={f.city} onChange={set('city')} required /></div>
+        <div className="f-group"><label className="f-label" htmlFor="ds">State</label><input id="ds" className="f-input" value={f.state} onChange={set('state')} required /></div></div>
       {msg && <p className="f-hint" role="status">{msg}</p>}
       <div><button className="btn" disabled={busy}>{busy ? 'Saving…' : 'Save address'}</button></div>
     </form>

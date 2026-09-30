@@ -7,7 +7,7 @@ import { clearPendingEmail, getPendingEmail } from '@/lib/pending';
 import AuthShell, { ShieldIcon } from './AuthShell';
 import s from './Auth.module.css';
 
-const LEN = 4;
+const LEN = 6;
 
 export default function VerifyForm() {
   const router = useRouter();

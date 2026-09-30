@@ -4,7 +4,6 @@ import Modal from '@/components/ui/Modal';
 import Icon from '@/components/ui/Icon';
 import { EmptyState, ErrorNote, Loading, StatusBadge } from '@/components/ui/bits';
 import { walletApi } from '@/lib/api';
-import { BANKS } from '@/lib/mock';
 import { naira, shortDate } from '@/lib/format';
 import { useResource } from '@/lib/useResource';
 
@@ -64,30 +63,32 @@ function WithdrawModal({ onClose }: { onClose: () => void }) {
 }
 
 function AddAccountModal({ onClose, onAdded }: { onClose: () => void; onAdded: () => void }) {
+  const { data: banks, loading: banksLoading } = useResource(() => walletApi.banks());
   const [step, setStep] = useState<'form' | 'otp'>('form');
-  const [bankName, setBankName] = useState('');
+  const [bankId, setBankId] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
   const [resolved, setResolved] = useState('');
   const [otp, setOtp] = useState('');
+  const [bankAccountId, setBankAccountId] = useState('');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
 
   async function resolve() {
-    if (!bankName || accountNumber.length < 10) return setErr('Select a bank and enter a 10-digit account number');
+    if (!bankId || accountNumber.length < 10) return setErr('Select a bank and enter a 10-digit account number');
     setBusy(true); setErr('');
-    try { setResolved((await walletApi.resolveAccount(bankName, accountNumber)).accountName); } catch { setErr('Could not resolve this account.'); } finally { setBusy(false); }
+    try { setResolved((await walletApi.resolveAccount(bankId, accountNumber)).accountName); } catch { setErr('Could not resolve this account.'); } finally { setBusy(false); }
   }
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!resolved) return setErr('Resolve the account name first');
     setBusy(true);
-    try { const r = await walletApi.addAccount({ bankName, accountNumber }); if (r.requiresOtp) setStep('otp'); else onAdded(); }
+    try { const r = await walletApi.addAccount({ bankId, accountNumber, accountName: resolved }); if (r.requiresOtp && r.id) { setBankAccountId(r.id); setStep('otp'); } else onAdded(); }
     catch { setErr('Could not add this account.'); } finally { setBusy(false); }
   }
   async function confirm(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
-    try { await walletApi.confirmAccount(otp); onAdded(); } catch { setErr('Incorrect code.'); } finally { setBusy(false); }
+    try { await walletApi.confirmAccount(bankAccountId, otp); onAdded(); } catch { setErr('Incorrect code.'); } finally { setBusy(false); }
   }
 
   return (
@@ -95,7 +96,7 @@ function AddAccountModal({ onClose, onAdded }: { onClose: () => void; onAdded: (
       {step === 'form' ? (
         <form className="f-form" onSubmit={submit}>
           <div className="f-group"><label className="f-label" htmlFor="bn">Bank</label>
-            <select id="bn" className="f-select" value={bankName} onChange={(e) => { setBankName(e.target.value); setResolved(''); }}><option value="">Select bank</option>{BANKS.map((b) => <option key={b}>{b}</option>)}</select></div>
+            <select id="bn" className="f-select" value={bankId} onChange={(e) => { setBankId(e.target.value); setResolved(''); }} disabled={banksLoading}><option value="">Select bank</option>{banks?.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}</select></div>
           <div className="f-group"><label className="f-label" htmlFor="an">Account number</label>
             <input id="an" className="f-input" inputMode="numeric" maxLength={10} value={accountNumber} onChange={(e) => { setAccountNumber(e.target.value.replace(/\D/g, '')); setResolved(''); }} onBlur={resolve} /></div>
           {resolved && <p className="f-hint" style={{ color: 'var(--ok)' }}>{resolved}</p>}

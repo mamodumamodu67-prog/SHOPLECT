@@ -34,7 +34,7 @@ export const authApi = {
   verify: async (b: { email: string; code: string }) =>
     isApiConfigured
       ? apiFetch<{ verified: boolean }>('/auth/otp/verify', { method: 'POST', body: { ...b, purpose: 'EMAIL_VERIFICATION' } })
-      : (await wait(), mockOn(), { ok: true as const }), // mock mode accepts any 4-digit code
+      : (await wait(), mockOn(), { ok: true as const }), // mock mode accepts any 6-digit code
   resend: async (b: { email: string }) =>
     isApiConfigured ? apiFetch<{ ok: true }>('/auth/otp/resend', { method: 'POST', body: { ...b, purpose: 'EMAIL_VERIFICATION' } }) : (await wait(300), { ok: true as const }),
 };

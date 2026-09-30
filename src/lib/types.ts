@@ -15,6 +15,7 @@ export type Person = { id: string; name: string; avatar?: string; when: string; 
 export type WalletTx = { id: string; date: string; amount: number; type: 'Withdraw' | 'Deposit'; status: 'Successful' | 'Failed' | 'Pending' };
 export type Wallet = { balance: number; incoming: number; outgoing: number; transactions: WalletTx[] };
 export type Bank = { id: string; accountName: string; accountNumber: string; bankName: string };
+export type BankOption = { id: string; name: string; code?: string };
 export type Message = { id: string; from: 'me' | 'them' | 'admin'; author?: string; text: string; when: string };
 export type Conversation = { id: string; name: string; date: string; active: boolean; messages: Message[] };
 export type Promotion = { id: string; created: string; product: string; category: string; status: 'Active' | 'Under Review' | 'Declined' | 'Completed'; start: string; end: string };
